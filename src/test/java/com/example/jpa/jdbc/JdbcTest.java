@@ -28,6 +28,9 @@ public class JdbcTest {
     private static final String PATTEN = "_";
     private static final String LINE = "\n";
     private static final String TAB = "\t";
+    private static final String DAO = "Dao";
+    private static final String SERVICE = "Service";
+    private static final String CONTROLLER = "Controller";
 
 
     @Test
@@ -148,14 +151,17 @@ public class JdbcTest {
             int count = metaData.getColumnCount();
             String tableName = metaData.getTableName(1);
             tableName = getStr1(tableName, PATTEN);
+            String entityName = StringUtils.capitalize(tableName);
+            String daoName = entityName+DAO;
+            String serviceName = entityName+SERVICE;
+            String controllerName = entityName+CONTROLLER;
 //            tableName = tableName.substring(tableName.indexOf(PATTEN)+1);
-            StringBuilder str = new StringBuilder("@Entity").append(LINE)
+            StringBuilder entityStr = new StringBuilder("@Entity").append(LINE)
                     .append("@Table(name = \"")
                     .append(table)
                     .append("\")").append(LINE)
                     .append("@Data").append(LINE)
-                    .append("public class "
-                            + StringUtils.capitalize(tableName.substring(1))
+                    .append("public class " + entityName
 //					+ " extends BaseInputVO implements Serializable {" + LINE + LINE +
                             + " implements Serializable {" + LINE + LINE +
                             TAB + "private static final long serialVersionUID = "
@@ -175,13 +181,47 @@ public class JdbcTest {
                     } else if ("DOUBLE".equalsIgnoreCase(typeName)) {
                         typeName = "Double";
                     }
-                    str.append(TAB).append("@Column(name = \"").append(columnName).append("\")").append(LINE)
+
+                    if (i == 1){
+                        entityStr.append(TAB).append("@Id").append(LINE).append(TAB).append("@GeneratedValue").append(LINE);
+                    }
+                    entityStr.append(TAB).append("@Column(name = \"").append(columnName).append("\")").append(LINE)
                             .append(TAB + "private ").append(typeName + " ").append(getStr1(columnName, PATTEN) + " ;")
                             .append(" // " + remarks + LINE).append(LINE);
                 }
             }
-            str.append("}" + LINE);
-            System.out.println(str.toString());
+            entityStr.append("}" + LINE+LINE);
+
+
+            System.out.println(LINE+LINE);
+            System.out.println("--------------------entity--------------------");
+            System.out.println(entityStr);
+
+            System.out.println("--------------------jpa--------------------");
+            System.out.println(LINE+LINE);
+
+            String daoStr = "@Repository"+LINE+"public interface "+daoName+" extends JpaRepository<"+entityName+", Integer> , Serializable {"
+                    +LINE+LINE+"}";
+            System.out.println(daoStr);
+
+            System.out.println("--------------------service--------------------");
+            System.out.println(LINE+LINE);
+            String serviceStr = "import org.springframework.stereotype.Service;"
+                    +LINE+LINE+"@Service"+LINE+"public interface "+serviceName+"{"
+                    +LINE+LINE+"}";
+            System.out.println(serviceStr);
+
+            System.out.println("--------------------controller--------------------");
+            System.out.println(LINE+LINE);
+            String controllerStr = "import org.springframework.web.bind.annotation.RequestMapping;"
+                    +LINE
+                    +"import org.springframework.web.bind.annotation.RestController;"
+                    +LINE+LINE
+                    +"@RestController"+LINE
+                    +"@RequestMapping(value = \"/"+entityName+"\")"
+                    +"public class "+controllerName+"{"
+                    +LINE+LINE+"}";
+            System.out.println(controllerStr);
         } catch (SQLException e) {
             e.printStackTrace();
         }
