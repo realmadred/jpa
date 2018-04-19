@@ -1,8 +1,12 @@
 package com.example.jpa.jdbc;
 
+import com.alibaba.fastjson.JSONObject;
+import com.example.jpa.entity.SysUser;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,8 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.sound.midi.Soundbank;
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
@@ -206,8 +212,7 @@ public class JdbcTest {
 
             System.out.println("--------------------service--------------------");
             System.out.println(LINE+LINE);
-            String serviceStr = "import org.springframework.stereotype.Service;"
-                    +LINE+LINE+"@Service"+LINE+"public interface "+serviceName+"{"
+            String serviceStr = "public interface "+serviceName+"{"
                     +LINE+LINE+"}";
             System.out.println(serviceStr);
 
@@ -218,7 +223,7 @@ public class JdbcTest {
                     +"import org.springframework.web.bind.annotation.RestController;"
                     +LINE+LINE
                     +"@RestController"+LINE
-                    +"@RequestMapping(value = \"/"+entityName+"\")"
+                    +"@RequestMapping(value = \"/"+StringUtils.uncapitalize(entityName)+"\")"
                     +"public class "+controllerName+"{"
                     +LINE+LINE+"}";
             System.out.println(controllerStr);
