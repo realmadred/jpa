@@ -11,6 +11,7 @@ public class JpaApplicationTests {
 
     @Test
     public void contextLoads() {
+
     }
 
 }

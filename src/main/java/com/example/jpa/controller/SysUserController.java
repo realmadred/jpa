@@ -4,7 +4,7 @@ import com.example.jpa.entity.SysUser;
 import com.example.jpa.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -27,8 +27,8 @@ public class SysUserController {
     }
 
     @GetMapping("/findByPage")
-    public Page<SysUser> findAll(Pageable pageable) {
-        return sysUserService.findAll(pageable);
+    public Page<SysUser> findAll(@RequestParam("page") Integer page,@RequestParam("size") Integer size) {
+        return sysUserService.findAll(PageRequest.of(page,size));
     }
 
     @GetMapping("/count")
@@ -36,12 +36,12 @@ public class SysUserController {
         return sysUserService.count();
     }
 
-    @PostMapping("deleteById")
+    @PostMapping("/deleteById")
     public void deleteById(Integer id) {
         sysUserService.deleteById(id);
     }
 
-    @PostMapping("delete")
+    @PostMapping("/delete")
     public void delete(SysUser sysUser) {
         sysUserService.delete(sysUser);
     }

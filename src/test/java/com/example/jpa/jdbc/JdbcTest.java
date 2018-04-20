@@ -143,7 +143,7 @@ public class JdbcTest {
 
     @Test
     public void createBean() {
-        String table = "sys_user";// 表名
+        String table = "basic_good_info";// 表名
         String sql = "SELECT * FROM " + table + " LIMIT 1";
         String sqlColumns = "show full columns from " + table;
         try (
@@ -206,7 +206,7 @@ public class JdbcTest {
             System.out.println("--------------------jpa--------------------");
             System.out.println(LINE+LINE);
 
-            String daoStr = "@Repository"+LINE+"public interface "+daoName+" extends JpaRepository<"+entityName+", Integer> , Serializable {"
+            String daoStr = "public interface "+daoName+" extends JpaRepository<"+entityName+", Integer> , Serializable {"
                     +LINE+LINE+"}";
             System.out.println(daoStr);
 
