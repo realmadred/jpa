@@ -3,6 +3,7 @@ package com.example.jpa.controller;
 import com.example.jpa.entity.SysUser;
 import com.example.jpa.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,7 @@ public class SysUserController {
     }
 
     @GetMapping("/findByPage")
+    @Cacheable("user.service.all")
     public Page<SysUser> findAll(@RequestParam("page") Integer page,@RequestParam("size") Integer size) {
         return sysUserService.findAll(PageRequest.of(page,size));
     }
