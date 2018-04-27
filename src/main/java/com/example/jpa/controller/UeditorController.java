@@ -25,7 +25,7 @@ import java.util.Set;
 
 @Controller
 @RequestMapping("/ueditor")
-public class ImageController {
+public class UeditorController {
 
     @Autowired
     private ImageConfig imageConfig;
@@ -35,7 +35,7 @@ public class ImageController {
         request.setCharacterEncoding( "utf-8" );
         response.setHeader("Content-Type" , "text/html");
         String path = imageConfig.getPath();
-        String configPath = ImageController.class.getResource("/").getPath();
+        String configPath = UeditorController.class.getResource("/").getPath();
         try {
             String action = request.getParameter("action");
             if("config".equals(action)){
