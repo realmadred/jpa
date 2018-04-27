@@ -33,4 +33,7 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 100MB
+image:
+  path: D:/soft/openresty-1.13.6.1-win32/html/images/
+  baseUrl: http://127.0.0.1/images/
 #        format_sql: true
