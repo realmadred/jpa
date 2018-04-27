@@ -18,7 +18,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/ueditor")
@@ -79,6 +82,7 @@ public class ImageController {
                             "\"url\": \"" + imageConfig.getBaseUrl() + fileName + "\"," +
                             "\"title\": \"" + fileName + "\"," +
                             "\"original\": \"" + fileName + "\"}";
+                    break;
                 } catch (IllegalStateException | IOException e) {
                     e.printStackTrace();
                 }
