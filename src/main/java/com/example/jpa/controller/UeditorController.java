@@ -1,6 +1,7 @@
 package com.example.jpa.controller;
 
 import com.baidu.ueditor.ActionEnter;
+import com.baidu.ueditor.define.BaseState;
 import com.example.jpa.config.ImageConfig;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class UeditorController {
     public String imgUpdate(MultipartHttpServletRequest request) {
         MultiValueMap<String, MultipartFile> multiFileMap = request.getMultiFileMap();
         Set<Map.Entry<String, List<MultipartFile>>> entries = multiFileMap.entrySet();
-        String result = "error";
+        BaseState state = new BaseState(false);
         for (Map.Entry<String, List<MultipartFile>> entry : entries) {
             List<MultipartFile> value = entry.getValue();
             for (MultipartFile file : value) {
@@ -72,23 +73,21 @@ public class UeditorController {
 //                String filePath = realPath + Constant.STATIC_PATH+Constant.IMAGE_UPDATE_PATH;
                 File dest = new File(imageConfig.getPath() + fileName);
                 // 检测是否存在目录
-                if (!dest.getParentFile().exists()) {
-                    dest.getParentFile().mkdirs();
-                }
+                File parentFile = dest.getParentFile();
+                parentFile.mkdirs();
                 try {
                     file.transferTo(dest);
                     //url的值为图片的实际访问地址 这里我用了Nginx代理，访问的路径是http://localhost/xxx.png
-                    result = "{\"state\": \"SUCCESS\"," +
-                            "\"url\": \"" + imageConfig.getBaseUrl() + fileName + "\"," +
-                            "\"title\": \"" + fileName + "\"," +
-                            "\"original\": \"" + fileName + "\"}";
+                    state.setState(true);
+                    state.putInfo("url",imageConfig.getBaseUrl() + fileName);
+                    state.putInfo("title",fileName);
+                    state.putInfo("original",fileName);
                     break;
                 } catch (IllegalStateException | IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-
-        return result;
+        return state.toJSONString();
     }
 }
