@@ -1,13 +1,21 @@
 package com.example.jpa.jdbc;
 
 import com.alibaba.fastjson.JSONObject;
+import com.example.jpa.controller.SysUserController;
 import com.example.jpa.entity.GoodInfoEntity;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class PlanTest {
 
@@ -28,6 +36,17 @@ public class PlanTest {
             }
         }
         System.out.println(object.toJSONString());
+    }
+
+    @Test
+    public void simple() throws Exception {
+        MockMvcBuilders.standaloneSetup(new SysUserController()).build()
+                .perform(get("/sysUser/findById").param("id", "4")
+                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json("{\"id\":4,\"name\":\"OsvfUP\",\"age\":23,\"password\":\"LCwleq\"}"))
+                .andReturn();
     }
 
 }
