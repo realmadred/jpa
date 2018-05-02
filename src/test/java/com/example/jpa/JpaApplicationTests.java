@@ -15,6 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -38,6 +39,7 @@ public class JpaApplicationTests {
                 .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("OsvfUP"))
                 .andExpect(MockMvcResultMatchers.content().json("{\"id\":4,\"name\":\"OsvfUP\",\"age\":23,\"password\":\"LCwleq\"}"))
                 .andReturn();
 //        MockHttpServletResponse response = mvcResult.getResponse();
