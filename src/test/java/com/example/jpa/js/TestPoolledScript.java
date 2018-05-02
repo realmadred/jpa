@@ -12,13 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestPoolledScript {
     static ExecutorService pool = Executors.newCachedThreadPool();
-    static String script = "function xx(a, m, n) { " +
+    static String script = "(function xx(a, m, n) { " +
             " var x = a + 1; java.lang.Thread.sleep(2); " +
             " var y = x * 2 + m; java.lang.Thread.sleep(3);" +
             " var z = y * 3 - n; java.lang.Thread.sleep(1);" +
             " return z;" +
-            "} " +
-            "xx(parameters.b, parameters.c, parameters.d);";
+            "})(parameters.b, parameters.c, parameters.d) " ;
+//            "xx(parameters.b, parameters.c, parameters.d);";
     static String script1 = "function xx(a, m, n) { " +
             " var x = a + 1; java.lang.Thread.sleep(2); " +
             " var y = x * 2 + m; java.lang.Thread.sleep(3);" +
@@ -27,8 +27,8 @@ public class TestPoolledScript {
             "} ;";
 
     public static void main(String[] args) throws ScriptException {
-        test1();
-//        test2();
+//        test1();
+        test2();
     }
 
     private static void test2() throws ScriptException {

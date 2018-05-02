@@ -31,6 +31,15 @@ public class JsTest {
             "    return \"greetings from javascript\";\n" +
             "};";
 
+    static String script1 = "function xx(a, m, n) { " +
+            " var x = a + 1; " +
+            " var y = x * 2 + m; " +
+            " var z = y * 3 - n;" +
+            "if (a > 10 && a <= 100) return 10;" +
+            "if (a > 100 && a <= 1000) return '大于100';" +
+            " return z;" +
+            "} ;";
+
 
     @Test
     public void test() {
@@ -88,12 +97,14 @@ public class JsTest {
             scriptEngine.eval(script);
             scriptEngine.eval(js);
             scriptEngine.eval(js2);
+            scriptEngine.eval(script1);
+            Invocable invocable = (Invocable) scriptEngine;
             StopWatch started = StopWatch.createStarted();
-            for (int i = 0; i <10000 ; i++) {
-                Invocable invocable = (Invocable) scriptEngine;
+            for (int i = 0; i <10000000 ; i++) {
 //                invocable.invokeFunction("calculate", 56800000000000023L,13.9);
 //                invocable.invokeFunction("printSalary", 1200,"name");
-                invocable.invokeFunction("fun1", "abcd");
+//                invocable.invokeFunction("fun1", "abcd");
+                invocable.invokeFunction("xx", i*10,i*20,i*30);
             }
             started.stop();
             System.out.println(started.getTime());
