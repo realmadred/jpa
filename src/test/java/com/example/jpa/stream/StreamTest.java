@@ -3,8 +3,10 @@ package com.example.jpa.stream;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -54,5 +56,20 @@ public class StreamTest {
                 .peek(e -> System.out.println("Mapped value: " + e))
                 .collect(toList());
         System.out.println(collect);
+    }
+
+    @Test
+    public void test2() {
+        long[] arrayOfLong = new long [20000];
+        Arrays.parallelSetAll( arrayOfLong,
+                index -> ThreadLocalRandom.current().nextInt( 1000000 ) );
+        Arrays.stream( arrayOfLong ).limit( 10 ).forEach(
+                i -> System.out.print( i + " " ) );
+        System.out.println();
+
+        Arrays.parallelSort( arrayOfLong );
+        Arrays.stream( arrayOfLong ).limit( 10 ).forEach(
+                i -> System.out.print( i + " " ) );
+        System.out.println();
     }
 }

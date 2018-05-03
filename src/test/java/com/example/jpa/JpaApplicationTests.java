@@ -29,7 +29,7 @@ public class JpaApplicationTests {
 
     @Before
     public void init() {
-        mvc = MockMvcBuilders.webAppContextSetup(context).build();
+        mvc = MockMvcBuilders.webAppContextSetup(context).alwaysExpect(status().isOk()).build();
     }
 
 
