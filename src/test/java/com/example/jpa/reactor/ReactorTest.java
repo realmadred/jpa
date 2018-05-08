@@ -9,10 +9,12 @@ import reactor.test.StepVerifier;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
 public class ReactorTest {
@@ -139,6 +141,70 @@ public class ReactorTest {
                 sink.complete();
             }
         }).skip(50).take(10).subscribe(System.out::println, System.err::println);
+    }
+
+    @Test
+    /**
+     * 用于计数；
+     * 向“池子”放自定义的数据；
+     * 告诉generate方法，自定义数据已发完；
+     * 触发数据流。
+     */
+    public void testGenerate1() {
+        final AtomicInteger count = new AtomicInteger(1);   // 1
+        Flux.generate(sink -> {
+            sink.next(count.get() + " : " + new Date());   // 2
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (count.getAndIncrement() >= 5) {
+                sink.complete();     // 3
+            }
+        }).subscribe(System.out::println);  // 4
+    }
+
+    @Test
+    /**
+     * 初始化状态值；
+     * 第二个参数是BiFunction，输入为状态和sink；
+     * 每次循环都要返回新的状态值给下次使用。
+     */
+    public void testGenerate2() {
+        Flux.generate(
+                () -> 1,    // 1
+                (count, sink) -> {      // 2
+                    sink.next(count + " : " + new Date());
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (count >= 5) {
+                        sink.complete();
+                    }
+                    return count + 1;   // 3
+                }).subscribe(System.out::println);
+    }
+
+    @Test
+    //最后将count值打印出来。
+    public void testGenerate3() {
+        Flux.generate(
+                () -> 1,    // 1
+                (count, sink) -> {      // 2
+                    sink.next(count + " : " + new Date());
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (count >= 5) {
+                        sink.complete();
+                    }
+                    return count + 1;   // 3
+                }, System.out::println).subscribe(System.out::println);
     }
 
     @Test
