@@ -1,12 +1,9 @@
 package com.example.jpa.jdbc;
 
-import com.alibaba.fastjson.JSONObject;
-import com.example.jpa.entity.SysUser;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,10 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.sound.midi.Soundbank;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
-import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
@@ -34,7 +30,7 @@ public class JdbcTest {
     private static final String PATTEN = "_";
     private static final String LINE = "\n";
     private static final String TAB = "\t";
-    private static final String DAO = "Dao";
+    private static final String DAO = "Repository";
     private static final String SERVICE = "Service";
     private static final String CONTROLLER = "Controller";
 
@@ -105,7 +101,7 @@ public class JdbcTest {
             DatabaseMetaData databaseMetaData = connection.getMetaData();
             // 获取说有表
             tables = databaseMetaData.getTables(connection.getCatalog(), "%", "%", new String[]{"TABLE"});
-            while(tables.next()){
+            while (tables.next()) {
                 String tableName = tables.getString("TABLE_NAME");
                 System.err.println("****** table name ******");
                 System.out.println(tableName);
@@ -123,15 +119,15 @@ public class JdbcTest {
             tables.close();
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
-            if (tables != null){
+        } finally {
+            if (tables != null) {
                 try {
                     tables.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             }
-            if (primaryKeys != null){
+            if (primaryKeys != null) {
                 try {
                     primaryKeys.close();
                 } catch (SQLException e) {
@@ -158,14 +154,16 @@ public class JdbcTest {
             String tableName = metaData.getTableName(1);
             tableName = getStr1(tableName, PATTEN);
             String entityName = StringUtils.capitalize(tableName);
-            String daoName = entityName+DAO;
-            String serviceName = entityName+SERVICE;
-            String controllerName = entityName+CONTROLLER;
+            String daoName = entityName + DAO;
+            String serviceName = entityName + SERVICE;
+            String controllerName = entityName + CONTROLLER;
 //            tableName = tableName.substring(tableName.indexOf(PATTEN)+1);
             StringBuilder entityStr = new StringBuilder("@Entity").append(LINE)
                     .append("@Table(name = \"")
                     .append(table)
                     .append("\")").append(LINE)
+                    .append("@DynamicInsert").append(LINE)
+                    .append("@@EntityListeners(AuditingEntityListener.class)").append(LINE)
                     .append("@Data").append(LINE)
                     .append("public class " + entityName
 //					+ " extends BaseInputVO implements Serializable {" + LINE + LINE +
@@ -188,7 +186,7 @@ public class JdbcTest {
                         typeName = "Double";
                     }
 
-                    if (i == 1){
+                    if (i == 1) {
                         entityStr.append(TAB).append("@Id").append(LINE).append(TAB).append("@GeneratedValue").append(LINE);
                     }
                     entityStr.append(TAB).append("@Column(name = \"").append(columnName).append("\")").append(LINE)
@@ -196,40 +194,80 @@ public class JdbcTest {
                             .append(" // " + remarks + LINE).append(LINE);
                 }
             }
-            entityStr.append("}" + LINE+LINE);
+            entityStr.append("}" + LINE + LINE);
 
 
-            System.out.println(LINE+LINE);
+            System.out.println(LINE + LINE);
             System.out.println("--------------------entity--------------------");
             System.out.println(entityStr);
 
             System.out.println("--------------------jpa--------------------");
-            System.out.println(LINE+LINE);
+            System.out.println(LINE + LINE);
 
-            String daoStr = "public interface "+daoName+" extends JpaRepository<"+entityName+", Integer> , Serializable {"
-                    +LINE+LINE+"}";
+            String daoStr = "public interface " + daoName + " extends JpaRepository<" + entityName + ", Long> ,QueryDslPredicateExecutor<" + entityName + "> {"
+                    + LINE + LINE + "}";
             System.out.println(daoStr);
 
             System.out.println("--------------------service--------------------");
-            System.out.println(LINE+LINE);
-            String serviceStr = "public interface "+serviceName+"{"
-                    +LINE+LINE+"}";
+            System.out.println(LINE + LINE);
+            String serviceStr = "public class " + serviceName + "{"
+                    + LINE + LINE
+                    + TAB + "@Autowired" + LINE
+                    + TAB + "@PersistenceContext " + LINE
+                    + TAB + "private EntityManager entityManager;" + LINE + LINE
+                    + TAB + "@Autowired" + LINE
+                    + TAB + "private " + getClassAndBeanName(daoName) + ";" + LINE + LINE
+                    + TAB + "public " + entityName + " add(" + getClassAndBeanName(entityName) + ") {" + LINE
+                    + TAB + TAB + "return " + StringUtils.uncapitalize(daoName) + ".saveAndFlush(" + StringUtils.uncapitalize(entityName) + ");" + LINE
+                    + TAB + "}" + LINE
+                    + TAB + "public " + entityName + " update(" + getClassAndBeanName(entityName) + ") {" + LINE
+                    + TAB + TAB + "return " + StringUtils.uncapitalize(daoName) + ".save(" + StringUtils.uncapitalize(entityName) + ");" + LINE
+                    + TAB + "}" + LINE
+                    + TAB + "public List<" + entityName + "> findAll() {" + LINE
+                    + TAB + TAB + "return " + StringUtils.uncapitalize(daoName) + ".findAll();" + LINE + LINE
+                    + TAB + "}" + LINE +
+                    "}";
             System.out.println(serviceStr);
 
             System.out.println("--------------------controller--------------------");
-            System.out.println(LINE+LINE);
+            System.out.println(LINE + LINE);
             String controllerStr = "import org.springframework.web.bind.annotation.RequestMapping;"
-                    +LINE
-                    +"import org.springframework.web.bind.annotation.RestController;"
-                    +LINE+LINE
-                    +"@RestController"+LINE
-                    +"@RequestMapping(value = \"/"+StringUtils.uncapitalize(entityName)+"\")"
-                    +"public class "+controllerName+"{"
-                    +LINE+LINE+"}";
+                    + LINE
+                    + "import org.springframework.web.bind.annotation.RestController;"
+                    + LINE + LINE
+                    + "@Log4j2"+LINE
+                    + "@Api(description = \"表业务控制类\")"+LINE
+                    + "@RestController" + LINE
+                    + "@RequestMapping(value = \"/" + getUrlByClassName(entityName) + "\")"
+                    + "public class " + controllerName + "{"
+                    + LINE + LINE
+                    + TAB + "@Autowired" + LINE
+                    + TAB + "private "+getClassAndBeanName(serviceName)+";"+LINE
+                    + "}";
             System.out.println(controllerStr);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 获取类型名称和bean名称
+     *
+     * @param className
+     * @return
+     */
+    private String getClassAndBeanName(String className) {
+        return className + " " + StringUtils.uncapitalize(className);
+    }
+
+    /**
+     * 获取类型名称和bean名称
+     *
+     * @param className
+     * @return
+     */
+    private String getUrlByClassName(String className) {
+        return StringUtils.replaceAll(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE,className),"_","/");
     }
 
     public static String getStr(String str, String patten) {
@@ -299,6 +337,9 @@ public class JdbcTest {
         System.out.println(stringBuilder);
         final ArrayList<Integer> integers = Lists.newArrayList(1, 21, 2, 3, 5, 6);
         System.out.println(Joiner.on(",").join(integers));
+    }
+
+    public static void main(String[] args) {
     }
 
 }
