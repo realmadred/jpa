@@ -3,8 +3,10 @@ package com.example.jpa.jdbc;
 import com.alibaba.fastjson.JSONObject;
 import com.example.jpa.controller.SysUserController;
 import com.example.jpa.entity.GoodsCategory;
+import com.example.jpa.entity.QCostTypeParam;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -13,6 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -27,13 +30,13 @@ public class PlanTest {
         for (Field field : declaredFields) {
             Class<?> type = field.getType();
             String name = field.getName();
-            if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(Long.class)){
-                object.put(name,RandomUtils.nextInt(100,20000));
-            }else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(Double.class)
-                    || type.isAssignableFrom(BigDecimal.class)){
-                object.put(name,RandomUtils.nextDouble(10.0,10000.0));
-            }else if (type.isAssignableFrom(String.class)){
-                object.put(name,RandomStringUtils.randomAlphabetic(6));
+            if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(Long.class)) {
+                object.put(name, RandomUtils.nextInt(100, 20000));
+            } else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(Double.class)
+                    || type.isAssignableFrom(BigDecimal.class)) {
+                object.put(name, RandomUtils.nextDouble(10.0, 10000.0));
+            } else if (type.isAssignableFrom(String.class)) {
+                object.put(name, RandomStringUtils.randomAlphabetic(6));
             }
         }
         System.out.println(object.toJSONString());
@@ -46,20 +49,37 @@ public class PlanTest {
         for (Field field : declaredFields) {
             Class<?> type = field.getType();
             String name = field.getName();
-            if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(Long.class)){
-                if (name.startsWith("is")){
-                    str.append(".param(\""+name+"\" , \""+RandomUtils.nextInt(0,2)+"\")\n");
-                }else {
-                    str.append(".param(\""+name+"\" , \""+RandomUtils.nextInt(100,20000)+"\")\n");
+            if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(Long.class)) {
+                if (name.startsWith("is")) {
+                    str.append(".param(\"" + name + "\" , \"" + RandomUtils.nextInt(0, 2) + "\")\n");
+                } else {
+                    str.append(".param(\"" + name + "\" , \"" + RandomUtils.nextInt(100, 20000) + "\")\n");
                 }
-            }else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(Double.class)
-                    || type.isAssignableFrom(BigDecimal.class)){
-                str.append(".param(\""+name+"\" , \""+RandomUtils.nextDouble(10.0,10000.0)+"\")\n");
-            }else if (type.isAssignableFrom(String.class)){
-                str.append(".param(\""+name+"\" , \""+RandomStringUtils.randomAlphabetic(6)+"\")\n");
-            }else if (type.isAssignableFrom(Date.class)){
-                str.append(".param(\""+name+"\" , \""+new Date()+"\")\n");
+            } else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(Double.class)
+                    || type.isAssignableFrom(BigDecimal.class)) {
+                str.append(".param(\"" + name + "\" , \"" + RandomUtils.nextDouble(10.0, 10000.0) + "\")\n");
+            } else if (type.isAssignableFrom(String.class)) {
+                str.append(".param(\"" + name + "\" , \"" + RandomStringUtils.randomAlphabetic(6) + "\")\n");
+            } else if (type.isAssignableFrom(Date.class)) {
+                str.append(".param(\"" + name + "\" , \"" + new Date() + "\")\n");
             }
+        }
+        System.out.println(str.toString());
+    }
+
+    @Test
+    public void getFields() {
+        final Class<QCostTypeParam> aClass = QCostTypeParam.class;
+        Field[] declaredFields = aClass.getDeclaredFields();
+        final String bean = StringUtils.uncapitalize(aClass.getSimpleName());
+        final String beanStatic = StringUtils.uncapitalize(bean.substring(1));
+        StringBuilder str = new StringBuilder();
+        for (Field field : declaredFields) {
+            String name = field.getName();
+            if (Objects.equals("serialVersionUID", name) || Objects.equals(beanStatic, name)) {
+                continue;
+            }
+            str.append(bean).append("." + name).append(",");
         }
         System.out.println(str.toString());
     }
