@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
@@ -93,6 +94,25 @@ public class PlanTest {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json("{\"id\":4,\"name\":\"OsvfUP\",\"age\":23,\"password\":\"LCwleq\"}"))
                 .andReturn();
+    }
+
+    private void sort(int[] arr){
+        final int length = arr.length;
+        for (int i = 0; i < length - 1; i++) {
+            for (int j = 0; j < length - 1 - i; j++) {
+                if (arr[j] > arr[j+1]){
+                    int temp = arr[j];
+                    arr[j] = arr[j+1];
+                    arr[j+1] = temp;
+                }
+            }
+        }
+        System.out.println(Arrays.toString(arr));
+    }
+
+    @Test
+    public void testSort() {
+        sort(new int[]{10,22,33,44,55,213,445,66,7,67,89,2,56,12,100,56});
     }
 
 }
